@@ -4,27 +4,27 @@
 static CGFloat cornerRadius = 20.0;
 static BOOL enabled = YES;
 
+// Объявляем классы для Theos
+%class SBDockView;
+%class SBDockViewiOS7;
+%class SBDockViewController;
+
 %hook SBDockView
 
 - (void)layoutSubviews {
 	%orig;
 	if (!enabled) return;
-
+	
 	UIView *backgroundView = nil;
 	if ([self respondsToSelector:@selector(_backgroundView)]) {
 		backgroundView = [self _backgroundView];
 	} else if ([self respondsToSelector:@selector(backgroundView)]) {
 		backgroundView = [self backgroundView];
 	}
-
+	
 	if (backgroundView) {
 		backgroundView.layer.cornerRadius = cornerRadius;
 		backgroundView.layer.masksToBounds = YES;
-
-		// Для iOS 10+ с blur-эффектом
-		if ([backgroundView respondsToSelector:@selector(_setContinuousCornerRadius:)]) {
-			[backgroundView _setContinuousCornerRadius:cornerRadius];
-		}
 	}
 }
 
@@ -35,9 +35,9 @@ static BOOL enabled = YES;
 - (void)layoutSubviews {
 	%orig;
 	if (!enabled) return;
-
-	for (UIView *subview in self.subviews) {
-		if ([subview isKindOfClass:[UIView class]] && subview != [self valueForKey:@"_iconListView"]) {
+	
+	for (UIView *subview in ((UIView *)self).subviews) {
+		if ([subview isKindOfClass:[UIView class]]) {
 			subview.layer.cornerRadius = cornerRadius;
 			subview.layer.masksToBounds = YES;
 		}
@@ -46,14 +46,13 @@ static BOOL enabled = YES;
 
 %end
 
-// Для iOS 9-10 с новым доком
 %hook SBDockViewController
 
 - (void)viewDidLayoutSubviews {
 	%orig;
 	if (!enabled) return;
-
-	UIView *view = self.view;
+	
+	UIView *view = ((UIViewController *)self).view;
 	for (UIView *subview in view.subviews) {
 		if ([subview class] == [UIView class] || [NSStringFromClass([subview class]) containsString:@"Background"]) {
 			subview.layer.cornerRadius = cornerRadius;
@@ -70,7 +69,7 @@ static void loadSettings() {
 	if (settings) {
 		NSNumber *enabledNum = settings[@"enabled"];
 		NSNumber *radiusNum = settings[@"cornerRadius"];
-
+		
 		if (enabledNum) enabled = [enabledNum boolValue];
 		if (radiusNum) cornerRadius = [radiusNum floatValue];
 	}
