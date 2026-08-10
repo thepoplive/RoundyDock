@@ -1,0 +1,82 @@
+name: Build RoundyDock
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      THEOS: /home/runner/theos
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos + toolchain
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          ls "$THEOS/makefiles/common.mk"
+          ls "$THEOS/toolchain/linux/iphone/bin" | head -5
+
+      - name: Build libplist from source
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libxml2-dev python3-dev
+          cd /tmp
+          git clone https://github.com/libimobiledevice/libplist.git
+          cd libplist
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+          sudo ldconfig
+
+      - name: Fetch iOS SDKs
+        run: |
+          mkdir -p "$THEOS/sdks"
+
+          fetch_sdk() {
+            local repo="$1"
+            rm -rf /tmp/sdks
+            git clone -n --depth=1 --filter=tree:0 "$repo" /tmp/sdks || return 1
+            cd /tmp/sdks
+            git sparse-checkout set --no-cone iPhoneOS8.4.sdk || return 1
+            git checkout || return 1
+            [ -d iPhoneOS8.4.sdk ] || return 1
+            cp -r iPhoneOS8.4.sdk "$THEOS/sdks/"
+            cd -
+          }
+
+          fetch_sdk https://github.com/Lessica/iPhoneOS-SDKs \
+            || fetch_sdk https://github.com/okanon/iPhoneOS.sdk
+
+          if [ ! -d "$THEOS/sdks/iPhoneOS8.4.sdk" ]; then
+            echo "::error::Failed to fetch SDK"
+            exit 1
+          fi
+
+      - name: Build RoundyDock
+        run: |
+          export PATH="$THEOS/toolchain/linux/iphone/bin:$PATH"
+          make package FINALPACKAGE=1
+
+      - name: Upload to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.2.0
+          name: RoundyDock v0.2.0
+          body: |
+            RoundyDock — rounded dock for iOS 7-10
+
+            Features:
+            - Smooth rounded corners for dock background
+            - Configurable corner radius (0-50)
+            - Toggle on/off
+            - Works on iOS 7, 8, 9, 10
+
+            Tested on iPhone 4S iOS 8.4.1
+          files: packages/*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

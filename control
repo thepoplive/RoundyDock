@@ -1,0 +1,9 @@
+Package: alt.blxck.roundy
+Name: RoundyDock
+Version: 0.2.0
+Architecture: iphoneos-arm
+Description: Rounded dock for iOS 7-10
+Maintainer: blxckfvde
+Author: blxckfvde
+Section: Tweaks
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader
