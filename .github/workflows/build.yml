@@ -17,25 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Theos + toolchain
-        run: |
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
-          ls "$THEOS/makefiles/common.mk"
-          ls "$THEOS/toolchain/linux/iphone/bin" | head -5
-
-      - name: Build libplist from source
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake libxml2-dev python3-dev
-          cd /tmp
-          git clone https://github.com/libimobiledevice/libplist.git
-          cd libplist
-          ./autogen.sh --prefix=/usr
-          make
-          sudo make install
-          sudo ldconfig
-
-      - name: Fetch iOS SDKs
+      - name: Fetch iOS 8.4 SDK first (before Theos, to skip its flaky auto-download)
         run: |
           mkdir -p "$THEOS/sdks"
 
@@ -58,6 +40,25 @@ jobs:
             echo "::error::Failed to fetch SDK"
             exit 1
           fi
+
+      - name: Install Theos + toolchain
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          ls "$THEOS/makefiles/common.mk"
+          ls "$THEOS/toolchain/linux/iphone/bin" | head -5
+          ls "$THEOS/sdks"
+
+      - name: Build libplist from source
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libxml2-dev python3-dev
+          cd /tmp
+          git clone https://github.com/libimobiledevice/libplist.git
+          cd libplist
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+          sudo ldconfig
 
       - name: Build RoundyDock
         run: |
