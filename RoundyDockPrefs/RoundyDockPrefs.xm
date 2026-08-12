@@ -18,7 +18,9 @@
 - (void)setPreferenceValue:(id)value specifier:(PSSpecifier*)specifier {
     NSString *key = [specifier propertyForKey:@"key"];
     if (!key) return;
-    NSMutableDictionary *settings = [[[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/alt.blxck.roundy.plist"] mutableCopy] ?: [NSMutableDictionary dictionary]];
+    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/alt.blxck.roundy.plist"];
+    NSMutableDictionary *settings = [dict mutableCopy];
+    if (!settings) settings = [NSMutableDictionary dictionary];
     settings[key] = value;
     [settings writeToFile:@"/var/mobile/Library/Preferences/alt.blxck.roundy.plist" atomically:YES];
     CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), CFSTR("alt.blxck.roundy/settingschanged"), NULL, NULL, YES);
