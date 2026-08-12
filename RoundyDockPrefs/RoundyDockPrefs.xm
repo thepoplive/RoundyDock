@@ -6,18 +6,15 @@
 @end
 
 @interface RoundyDockPrefsListController : PSListController
-{
-    NSArray *_specifiers;
-}
 @end
 
 @implementation RoundyDockPrefsListController
 
 - (NSArray *)specifiers {
-    if (!_specifiers) {
-        _specifiers = [self loadSpecifiersFromPlistName:@"Root" target:self];
+    if (![self valueForKey:@"_specifiers"]) {
+        [self setValue:[self loadSpecifiersFromPlistName:@"Root" target:self] forKey:@"_specifiers"];
     }
-    return _specifiers;
+    return [self valueForKey:@"_specifiers"];
 }
 
 @end
