@@ -43,6 +43,7 @@ jobs:
 
       - name: Install Theos + toolchain
         run: |
+          rm -rf "$THEOS"
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
           ls "$THEOS/makefiles/common.mk"
           ls "$THEOS/toolchain/linux/iphone/bin" | head -5
