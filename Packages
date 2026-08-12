@@ -1,0 +1,16 @@
+Package: alt.blxck.roundy
+Version: 0.2.0
+Architecture: iphoneos-arm
+Maintainer: blxckfvde
+Installed-Size: 368
+Depends: mobilesubstrate (>= 0.9.5000), preferenceloader
+Filename: ./alt.blxck.roundy_0.2.0_iphoneos-arm.deb
+Size: 11382
+MD5sum: 6a7d92cd68ed3a88459c7aa0cb79044b
+SHA1: 197d95c360ca1606735cca1d35aa4c6af921acfb
+SHA256: e83f0c2b692a7eed6a2275a3d4235268990fdd1a5e840d8de3984da1ebfea14d
+Section: Tweaks
+Description: Rounded dock for iOS 7-10
+Author: blxckfvde
+Name: RoundyDock
+
