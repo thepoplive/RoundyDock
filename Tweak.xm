@@ -12,7 +12,9 @@
 @interface SBDockViewController : UIViewController
 @end
 
-static CGFloat cornerRadius = 20.0;
+static CGFloat cornerRadius = 5.0;
+static CGFloat dockScale = 1.0;
+static BOOL hideLabels = NO;
 static BOOL enabled = YES;
 
 %hook SBDockView
@@ -21,10 +23,30 @@ static BOOL enabled = YES;
 	%orig;
 	if (!enabled) return;
 	
-	self.layer.cornerRadius = cornerRadius;
-	self.layer.masksToBounds = YES;
+	UIView *backgroundView = nil;
+	if ([self respondsToSelector:@selector(_backgroundView)]) {
+		backgroundView = [self _backgroundView];
+	} else if ([self respondsToSelector:@selector(backgroundView)]) {
+		backgroundView = [self backgroundView];
+	}
+	
+	if (backgroundView) {
+		backgroundView.layer.cornerRadius = cornerRadius;
+		backgroundView.layer.masksToBounds = YES;
+	}
 	
 	for (UIView *subview in self.subviews) {
+		if (subview == backgroundView) continue;
+		
+		NSString *className = NSStringFromClass([subview class]);
+		if ([className containsString:@"Label"]) {
+			subview.hidden = hideLabels;
+		}
+		
+		if (dockScale != 1.0) {
+			subview.transform = CGAffineTransformMakeScale(dockScale, dockScale);
+		}
+		
 		subview.layer.cornerRadius = cornerRadius;
 		subview.layer.masksToBounds = YES;
 	}
@@ -39,7 +61,15 @@ static BOOL enabled = YES;
 	if (!enabled) return;
 	
 	for (UIView *subview in self.subviews) {
+		NSString *className = NSStringFromClass([subview class]);
+		if ([className containsString:@"Label"]) {
+			subview.hidden = hideLabels;
+		}
+		
 		if ([subview isKindOfClass:[UIView class]]) {
+			if (dockScale != 1.0) {
+				subview.transform = CGAffineTransformMakeScale(dockScale, dockScale);
+			}
 			subview.layer.cornerRadius = cornerRadius;
 			subview.layer.masksToBounds = YES;
 		}
@@ -71,8 +101,18 @@ static void loadSettings() {
 	if (settings) {
 		NSNumber *enabledNum = settings[@"enabled"];
 		NSNumber *radiusNum = settings[@"cornerRadius"];
+		NSNumber *scaleNum = settings[@"dockScale"];
+		NSNumber *hideLabelsNum = settings[@"hideLabels"];
 		if (enabledNum) enabled = [enabledNum boolValue];
-		if (radiusNum) cornerRadius = [radiusNum floatValue];
+		if (radiusNum) {
+			float raw = [radiusNum floatValue];
+			cornerRadius = 5.0 + (raw - 1.0) * (45.0 / 99.0);
+		}
+		if (scaleNum) {
+			float raw = [scaleNum floatValue];
+			dockScale = 0.2 + (raw / 100.0) * 1.6;
+		}
+		if (hideLabelsNum) hideLabels = [hideLabelsNum boolValue];
 	}
 }
 

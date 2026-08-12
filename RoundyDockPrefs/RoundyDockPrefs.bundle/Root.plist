@@ -26,6 +26,20 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>alt.blxck.roundy</string>
+			<key>key</key>
+			<string>hideLabels</string>
+			<key>label</key>
+			<string>Hide Labels</string>
+			<key>PostNotification</key>
+			<string>alt.blxck.roundy/settingschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>Appearance</string>
@@ -34,15 +48,33 @@
 			<key>cell</key>
 			<string>PSSliderCell</string>
 			<key>default</key>
-			<real>20</real>
+			<real>1</real>
 			<key>defaults</key>
 			<string>alt.blxck.roundy</string>
 			<key>key</key>
 			<string>cornerRadius</string>
 			<key>min</key>
-			<real>0</real>
+			<real>1</real>
 			<key>max</key>
+			<real>100</real>
+			<key>showValue</key>
+			<true/>
+			<key>PostNotification</key>
+			<string>alt.blxck.roundy/settingschanged</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>default</key>
 			<real>50</real>
+			<key>defaults</key>
+			<string>alt.blxck.roundy</string>
+			<key>key</key>
+			<string>dockScale</string>
+			<key>min</key>
+			<real>1</real>
+			<key>max</key>
+			<real>100</real>
 			<key>showValue</key>
 			<true/>
 			<key>PostNotification</key>
