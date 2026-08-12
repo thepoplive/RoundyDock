@@ -1,7 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
-// Объявляем классы для компилятора
 @interface SBDockView : UIView
 - (UIView *)_backgroundView;
 - (UIView *)backgroundView;
@@ -22,16 +21,12 @@ static BOOL enabled = YES;
 	%orig;
 	if (!enabled) return;
 	
-	UIView *backgroundView = nil;
-	if ([self respondsToSelector:@selector(_backgroundView)]) {
-		backgroundView = [self _backgroundView];
-	} else if ([self respondsToSelector:@selector(backgroundView)]) {
-		backgroundView = [self backgroundView];
-	}
+	self.layer.cornerRadius = cornerRadius;
+	self.layer.masksToBounds = YES;
 	
-	if (backgroundView) {
-		backgroundView.layer.cornerRadius = cornerRadius;
-		backgroundView.layer.masksToBounds = YES;
+	for (UIView *subview in self.subviews) {
+		subview.layer.cornerRadius = cornerRadius;
+		subview.layer.masksToBounds = YES;
 	}
 }
 
