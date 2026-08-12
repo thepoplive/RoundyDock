@@ -66,6 +66,45 @@ jobs:
           export PATH="$THEOS/toolchain/linux/iphone/bin:$PATH"
           make package FINALPACKAGE=1
 
+      - name: Prepare Cydia repository
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev bzip2
+          
+          mkdir -p repo
+          cp packages/*.deb repo/
+          cd repo
+          
+          cat > Release << 'EOF'
+          Origin: RoundyDock
+          Label: RoundyDock
+          Suite: stable
+          Version: 1.0
+          Architectures: iphoneos-arm
+          Components: main
+          EOF
+          
+          dpkg-scanpackages --multiversion . /dev/null > Packages
+          gzip -k -f Packages
+          bzip2 -k -f Packages
+          cd ..
+
+      - name: Deploy Cydia repository
+        run: |
+          rm -rf repo-deploy
+          mkdir repo-deploy
+          cp -r repo/* repo-deploy/
+          
+          cd repo-deploy
+          git init
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/thepoplive/RoundyDock.git
+          git checkout -b repo
+          git add .
+          git commit -m "Update Cydia repo"
+          git push origin repo --force
+
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2
         with:
